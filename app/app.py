@@ -6,6 +6,7 @@ PYTHONPATH must include /app (set in run.sh).
 """
 import logging
 import os
+import shutil
 import threading
 from datetime import date, datetime, timedelta
 
@@ -816,8 +817,22 @@ def _poll_ha_sensors():
 # Startup
 # ---------------------------------------------------------------------------
 
+def _install_lovelace_card():
+    """Copy bbt-card.js to /config/www/ so users can add it as a Lovelace resource."""
+    src = "/app/static/js/bbt-card.js"
+    www_dir = "/config/www"
+    dst = os.path.join(www_dir, "bbt-card.js")
+    try:
+        os.makedirs(www_dir, exist_ok=True)
+        shutil.copy2(src, dst)
+        logger.info("Lovelace card installed → %s", dst)
+    except Exception as exc:
+        logger.warning("Could not install Lovelace card: %s", exc)
+
+
 if __name__ == "__main__":
     init_db()
+    _install_lovelace_card()
 
     # Ensure every existing profile has an open cycle
     db0 = get_db()

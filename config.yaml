@@ -27,4 +27,6 @@ schema:
   temp_unit: "list(F|C)"
   ha_sensor_entity: "str?"
   poll_interval_minutes: "int(1,60)?"
+map:
+  - config:rw
 init: false
