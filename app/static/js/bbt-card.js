@@ -301,5 +301,5 @@ window.customCards.push({
   type:        'bbt-fertility-card',
   name:        'BBT Fertility Card',
   description: 'Shows cycle phase, day, last temperature, fertile window, ovulation status, and next period estimate.',
-  preview:     true,
+  preview:     false,
 });
