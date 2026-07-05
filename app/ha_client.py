@@ -247,8 +247,11 @@ def stop_polling() -> None:
 # Lovelace resource registration
 # ---------------------------------------------------------------------------
 
-_CARD_URL = "/hassio/ingress/bbt_fertility_tracker/bbt-card.js"
-_OLD_CARD_URL = "/local/bbt-card.js"
+_CARD_URL = "https://cdn.jsdelivr.net/gh/kylerpbyrd/bbt-fertility-tracker@main/app/static/js/bbt-card.js"
+_OLD_CARD_URLS = [
+    "/local/bbt-card.js",
+    "/hassio/ingress/bbt_fertility_tracker/bbt-card.js",
+]
 
 
 def register_lovelace_card() -> None:
@@ -262,11 +265,11 @@ def register_lovelace_card() -> None:
         logger.warning("Lovelace resources API not available (YAML mode?)")
         return
 
-    # Remove stale /local/ registration
+    # Remove any stale registrations
     for r in resources:
-        if r.get("url") == _OLD_CARD_URL:
+        if r.get("url") in _OLD_CARD_URLS:
             _request("DELETE", f"/lovelace/resources/{r['id']}")
-            logger.info("Removed old Lovelace resource: %s", _OLD_CARD_URL)
+            logger.info("Removed old Lovelace resource: %s", r.get("url"))
 
     resources = _request("GET", "/lovelace/resources") or []
     if any(r.get("url") == _CARD_URL for r in resources):
