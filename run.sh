@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv bashio
 
 # Ensure Python can find the app modules
-export PYTHONPATH="/app:${PYTHONPATH}"
+export PYTHONPATH="/app:${PYTHONPATH:-}"
 export PATH="/opt/venv/bin:${PATH}"
 export DATA_PATH="/data"
 
