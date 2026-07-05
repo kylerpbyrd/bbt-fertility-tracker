@@ -243,6 +243,46 @@ def stop_polling() -> None:
         _poll_timer = None
 
 
+# ---------------------------------------------------------------------------
+# Lovelace resource registration
+# ---------------------------------------------------------------------------
+
+_CARD_URL = "/hassio/ingress/bbt_fertility_tracker/bbt-card.js"
+_OLD_CARD_URL = "/local/bbt-card.js"
+
+
+def register_lovelace_card() -> None:
+    """
+    Register bbt-card.js as a Lovelace module resource via the HA REST API.
+    Removes the old /local/ registration if present to avoid duplicate definitions.
+    Safe to call every startup — skips if already registered.
+    """
+    resources = _request("GET", "/lovelace/resources")
+    if not isinstance(resources, list):
+        logger.warning("Lovelace resources API not available (YAML mode?)")
+        return
+
+    # Remove stale /local/ registration
+    for r in resources:
+        if r.get("url") == _OLD_CARD_URL:
+            _request("DELETE", f"/lovelace/resources/{r['id']}")
+            logger.info("Removed old Lovelace resource: %s", _OLD_CARD_URL)
+
+    resources = _request("GET", "/lovelace/resources") or []
+    if any(r.get("url") == _CARD_URL for r in resources):
+        logger.debug("Lovelace card already registered")
+        return
+
+    result = _request("POST", "/lovelace/resources", {
+        "res_type": "module",
+        "url": _CARD_URL,
+    })
+    if result:
+        logger.info("Lovelace card registered at %s", _CARD_URL)
+    else:
+        logger.warning("Could not register Lovelace card resource")
+
+
 def _schedule_next(interval_minutes: int) -> None:
     global _poll_timer
     if _poll_timer:

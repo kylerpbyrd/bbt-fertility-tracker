@@ -5,13 +5,15 @@ Run from: python3 /app/app.py
 PYTHONPATH must include /app (set in run.sh).
 """
 import logging
+import mimetypes
 import os
 import shutil
 import threading
 from datetime import date, datetime, timedelta
 
-from flask import (Flask, flash, g, jsonify, redirect, render_template,
-                   request, session, url_for)
+from flask import (Flask, flash, g, jsonify, make_response, redirect,
+                   render_template, request, send_from_directory,
+                   session, url_for)
 
 from algorithms.cycle_analysis import (analyze_cycle, get_current_cycle_day,
                                        predict_next_period)
@@ -26,6 +28,9 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+# Ensure .js files are served with the correct MIME type regardless of OS database
+mimetypes.add_type("application/javascript", ".js")
 
 # ---------------------------------------------------------------------------
 # HA Ingress path middleware
@@ -767,6 +772,17 @@ def new_cycle():
     return redirect(url_for("dashboard"))
 
 
+@app.route("/bbt-card.js")
+def serve_bbt_card():
+    """Serve the Lovelace card JS with explicit application/javascript MIME type."""
+    resp = make_response(
+        send_from_directory("/app/static/js", "bbt-card.js")
+    )
+    resp.headers["Content-Type"] = "application/javascript; charset=utf-8"
+    resp.headers["Cache-Control"] = "public, max-age=3600"
+    return resp
+
+
 # ---------------------------------------------------------------------------
 # HA sensor polling callback
 # ---------------------------------------------------------------------------
@@ -855,6 +871,7 @@ if __name__ == "__main__":
         db0.close()
 
     ha_client.start_polling(POLL_INTERVAL, _poll_ha_sensors)
+    ha_client.register_lovelace_card()
 
     port = int(os.environ.get("PORT", 8099))
     app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
