@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Python lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install flake8 flask==3.0.3
+
+      - name: Flake8
+        run: |
+          flake8 app/ \
+            --max-line-length=110 \
+            --exclude=app/static \
+            --extend-ignore=E501
+
+  validate-addon:
+    name: Validate add-on config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check config.yaml exists
+        run: test -f config.yaml
+
+      - name: Validate YAML syntax
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: config.yaml repository.yaml translations/
+          config_data: |
+            extends: default
+            rules:
+              line-length:
+                max: 160
+              truthy:
+                allowed-values: ['true', 'false']
+
+      - name: Check required add-on fields
+        run: |
+          python3 - <<'EOF'
+          import yaml, sys
+          with open("config.yaml") as f:
+              cfg = yaml.safe_load(f)
+          required = ["name", "version", "slug", "description", "arch", "startup", "boot"]
+          missing = [k for k in required if k not in cfg]
+          if missing:
+              print(f"ERROR: missing required fields: {missing}")
+              sys.exit(1)
+          print(f"config.yaml OK — version {cfg['version']}")
+          EOF

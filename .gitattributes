@@ -1,0 +1,11 @@
+# Ensure Unix line endings for shell scripts (required for Linux containers)
+*.sh        text eol=lf
+
+# Default line-ending handling for everything else
+*           text=auto
+
+# Binary files
+*.png       binary
+*.jpg       binary
+*.ico       binary
+Dockerfile  text eol=lf

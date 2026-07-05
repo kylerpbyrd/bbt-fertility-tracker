@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Settings — BBT Fertility Tracker{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="back-link">← Dashboard</a>
+
+{% if profile %}
+<div class="card">
+  <div class="card-title">⚙️ Profile Settings — {{ profile.name }}</div>
+  <form method="POST" action="{{ url_for('settings') }}">
+
+    {# ── Temperature unit ──────────────────────────────────────────────── #}
+    <div class="form-group">
+      <label>Temperature Unit</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="radio" name="temp_unit" value="F"
+                 {% if profile.temp_unit == 'F' %}checked{% endif %}>
+          °F (Fahrenheit)
+        </label>
+        <label class="checkbox-item">
+          <input type="radio" name="temp_unit" value="C"
+                 {% if profile.temp_unit == 'C' %}checked{% endif %}>
+          °C (Celsius)
+        </label>
+      </div>
+    </div>
+
+    {# ── Interpretation method ────────────────────────────────────────── #}
+    <div class="form-group">
+      <label for="interpretation_method">Interpretation Method</label>
+      <select id="interpretation_method" name="interpretation_method">
+        <option value="standard"
+                {% if profile.interpretation_method == 'standard' %}selected{% endif %}>
+          Standard (3-day shift rule)
+        </option>
+        <option value="conservative"
+                {% if profile.interpretation_method == 'conservative' %}selected{% endif %}>
+          Conservative (requires higher 3rd day temp)
+        </option>
+      </select>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">
+        Conservative requires the 3rd post-shift temperature to be at least 0.2°F (0.1°C) above coverline.
+      </div>
+    </div>
+
+    {# ── HA sensor entity ─────────────────────────────────────────────── #}
+    <div class="form-group">
+      <label for="ha_sensor_entity">Home Assistant Sensor Entity (optional)</label>
+      <input type="text" id="ha_sensor_entity" name="ha_sensor_entity"
+             value="{{ profile.ha_sensor_entity or '' }}"
+             placeholder="e.g. sensor.bedroom_thermometer">
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">
+        If set, the sensor will be polled automatically and shown on the Log Entry page.
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">💾 Save Settings</button>
+  </form>
+</div>
+
+{# ── New cycle ────────────────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-title">🔄 Start New Cycle</div>
+  <p style="font-size:13px;color:var(--text-secondary)">
+    Use this if you forgot to mark period start during a log entry. 
+    This will close the current cycle and begin a new one.
+  </p>
+  <form method="POST" action="{{ url_for('new_cycle') }}"
+        onsubmit="return confirm('Close current cycle and start a new one?')">
+    <div style="display:flex;gap:10px;align-items:flex-end">
+      <div class="form-group" style="flex:1;margin:0">
+        <label for="start_date">Period Start Date</label>
+        <input type="date" id="start_date" name="start_date"
+               value="{{ cycle.start_date if cycle else '' }}">
+      </div>
+      <button type="submit" class="btn btn-danger" style="height:38px">Start New Cycle</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

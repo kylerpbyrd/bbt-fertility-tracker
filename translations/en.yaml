@@ -1,0 +1,13 @@
+configuration:
+  temp_unit:
+    name: Temperature Unit
+    description: The temperature unit used for BBT readings. Changing this does not convert existing stored data.
+  ha_sensor_entity:
+    name: Home Assistant Sensor Entity
+    description: >-
+      Optional. An existing HA sensor entity ID whose state is a numeric
+      temperature (e.g. sensor.bedroom_thermometer). The add-on will
+      automatically import today's reading if no manual entry exists.
+  poll_interval_minutes:
+    name: Sensor Poll Interval
+    description: How often (in minutes) to check the HA sensor entity for a new temperature reading.

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Cycle Detail — BBT Fertility Tracker{% endblock %}
+
+{% block head %}
+{% if chart_js_local %}
+  <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chartjs-plugin-annotation.min.js') }}"></script>
+{% else %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/chart-init.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('history') }}" class="back-link">← History</a>
+
+{# ── Cycle summary ──────────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-title">
+    Cycle starting {{ cycle.start_date }}
+    {% if not cycle.end_date %}<span class="phase-badge phase-pre_ovulatory" style="font-size:11px;margin-left:8px">Active</span>{% endif %}
+  </div>
+  <div class="grid-4" style="margin-bottom:4px">
+    <div class="stat-tile">
+      <div class="stat-value">{{ cycle.cycle_length or '—' }}</div>
+      <div class="stat-label">Cycle Length</div>
+    </div>
+    <div class="stat-tile">
+      {% if insight and insight.ovulation_date %}
+        <div class="stat-value" style="font-size:14px">{{ insight.ovulation_date[5:] }}</div>
+      {% else %}
+        <div class="stat-value">—</div>
+      {% endif %}
+      <div class="stat-label">Ovulation</div>
+    </div>
+    <div class="stat-tile">
+      {% if insight and insight.luteal_length %}
+        <div class="stat-value"
+             {% if insight.luteal_length < 10 %}style="color:var(--coverline-color)"{% endif %}>
+          {{ insight.luteal_length }}d
+        </div>
+      {% else %}
+        <div class="stat-value">—</div>
+      {% endif %}
+      <div class="stat-label">Luteal Phase</div>
+    </div>
+    <div class="stat-tile">
+      {% if insight and insight.coverline %}
+        <div class="stat-value" style="font-size:16px">{{ insight.coverline }}</div>
+      {% else %}
+        <div class="stat-value">—</div>
+      {% endif %}
+      <div class="stat-label">Coverline °{{ profile.temp_unit if profile else 'F' }}</div>
+    </div>
+  </div>
+
+  {% if insight %}
+    {% if insight.fertile_start_date and insight.fertile_end_date %}
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">
+        <strong>Fertile window:</strong>
+        {{ insight.fertile_start_date }} → {{ insight.fertile_end_date }}
+      </div>
+    {% endif %}
+    {% if insight.luteal_phase_short %}
+      <div class="warning-box warning" style="margin-top:10px">
+        ⚠️ Short luteal phase detected ({{ insight.luteal_length }} days). 
+        This may affect implantation. Consider consulting a healthcare provider.
+      </div>
+    {% endif %}
+    {% if insight.pregnancy_indicator %}
+      <div class="warning-box info" style="margin-top:10px">
+        ℹ️ {{ insight.consecutive_elevated_temps }}+ consecutive elevated temperatures — 
+        pregnancy is a possibility!
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+{# ── Chart ──────────────────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-title">📈 BBT Chart</div>
+  <div class="chart-container">
+    <canvas id="bbtChart"></canvas>
+  </div>
+  <div class="chart-legend" style="font-size:11px;color:var(--text-secondary);margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">
+    <span><span style="color:#9c27b0">●</span> Temperature</span>
+    <span><span style="color:#f44336">- -</span> Coverline</span>
+    <span style="background:#e8f5e9;padding:1px 6px;border-radius:4px">Fertile window</span>
+    <span><span style="color:#ff9800">|</span> Ovulation</span>
+    <span><span style="color:#bdbdbd">○</span> Discarded</span>
+  </div>
+</div>
+
+{# ── Temperature table ──────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-title">🗂 Daily Log</div>
+  {% if temps %}
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Date</th>
+            <th>Temp</th>
+            <th>Flow</th>
+            <th>Mucus</th>
+            <th>OPK</th>
+            <th>Symptoms</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in temps | reverse %}
+            {% set s = signs | selectattr('date','eq',t.date) | first | default(none) %}
+            {% set syms = symptoms_by_date.get(t.date, []) %}
+            <tr {% if t.is_discarded %}style="opacity:0.55"{% endif %}>
+              <td style="color:var(--text-secondary)">{{ t.cycle_day }}</td>
+              <td>{{ t.date[5:] }}</td>
+              <td>
+                <strong>{{ t.temp_value }}</strong>
+                {% if t.is_discarded %}
+                  <span style="font-size:10px;color:#ff9800">⚠ discarded</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if s and s.menstrual_flow and s.menstrual_flow != 'none' %}
+                  <span class="flow-{{ s.menstrual_flow }}" style="font-size:12px">
+                    🩸{{ s.menstrual_flow | title }}
+                  </span>
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                {% if s and s.cervical_mucus %}
+                  <span class="mucus-{{ s.cervical_mucus }}" style="font-size:12px">
+                    {{ s.cervical_mucus | replace('_',' ') | title or '—' }}
+                  </span>
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                {% if s and s.opk_result and s.opk_result not in ['','not_tested'] %}
+                  <span class="opk-{{ s.opk_result }}" style="font-size:12px;font-weight:600">
+                    {{ s.opk_result | title }}
+                  </span>
+                {% else %}—{% endif %}
+              </td>
+              <td style="font-size:11px">
+                {% if syms %}
+                  {{ syms | join(', ') | replace('_',' ') }}
+                {% else %}—{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state" style="padding:20px">
+      <p>No temperatures logged for this cycle yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const r = await fetch('{{ url_for("api_chart_data", cycle_id=cycle.id) }}');
+    const data = await r.json();
+    initBBTChart('bbtChart', data);
+  } catch(e) {
+    console.warn('Chart load failed:', e);
+  }
+});
+</script>
+{% endblock %}

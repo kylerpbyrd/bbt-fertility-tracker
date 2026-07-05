@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Profiles — BBT Fertility Tracker{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="back-link">← Dashboard</a>
+
+{# ── Create new profile ─────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-title">➕ Create Profile</div>
+  <form method="POST" style="display:flex;gap:10px;align-items:flex-end">
+    <input type="hidden" name="action" value="create">
+    <div class="form-group" style="flex:1;margin:0">
+      <label for="name">Profile Name</label>
+      <input type="text" id="name" name="name" placeholder="e.g. Alice" required>
+    </div>
+    <button type="submit" class="btn btn-primary" style="height:38px">Create</button>
+  </form>
+</div>
+
+{# ── Profiles list ──────────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-title">👤 All Profiles</div>
+  {% if all_profiles %}
+    {% for p in all_profiles %}
+      <div class="profile-row {% if p.active %}profile-active{% endif %}">
+        <div class="profile-info">
+          <span class="profile-name">{{ p.name }}</span>
+          <span class="profile-meta">
+            {{ p.temp_unit }}  ·  {{ p.interpretation_method | title }}
+            {% if p.ha_sensor_entity %} · HA: {{ p.ha_sensor_entity }}{% endif %}
+          </span>
+        </div>
+        <div class="profile-actions">
+          {% if p.active %}
+            <span class="phase-badge phase-fertile" style="font-size:11px">Active</span>
+          {% else %}
+            <form method="POST" style="display:inline">
+              <input type="hidden" name="action" value="activate">
+              <input type="hidden" name="profile_id" value="{{ p.id }}">
+              <button type="submit" class="btn btn-secondary btn-sm">Activate</button>
+            </form>
+            <form method="POST" style="display:inline"
+                  onsubmit="return confirm('Delete profile {{ p.name }} and all its data?')">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="profile_id" value="{{ p.id }}">
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state" style="padding:20px">
+      <p>No profiles yet. Create one above.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

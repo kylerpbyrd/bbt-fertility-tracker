@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Log Entry — BBT Fertility Tracker{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('dashboard') }}" class="back-link">← Dashboard</a>
+
+<div class="card">
+  <div class="card-title">📝 Daily Entry</div>
+
+  {% if ha_reading %}
+    <div style="margin-bottom:12px">
+      <span class="ha-sensor-chip">🏠 HA Sensor reading: {{ ha_reading }}°{{ profile.temp_unit }}</span>
+    </div>
+  {% endif %}
+
+  <form method="POST" action="{{ url_for('entry') }}">
+
+    {# ── Date ─────────────────────────────────────────────────────────── #}
+    <div class="form-group">
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date"
+             value="{{ entry_date }}" max="{{ today }}">
+    </div>
+
+    {# ── Temperature ──────────────────────────────────────────────────── #}
+    <div class="form-group">
+      <label for="temp_value">
+        Basal Body Temperature (°{{ profile.temp_unit }})
+      </label>
+      <input type="number"
+             id="temp_value"
+             name="temp_value"
+             class="temp-input-large"
+             step="0.01"
+             placeholder="{% if profile.temp_unit == 'F' %}e.g. 97.40{% else %}e.g. 36.40{% endif %}"
+             value="{{ ha_reading if ha_reading and not ex_temp else (ex_temp.temp_value if ex_temp else '') }}">
+    </div>
+
+    <div class="form-group">
+      <label for="time_taken">Time Taken (optional)</label>
+      <input type="time" id="time_taken" name="time_taken"
+             value="{{ ex_temp.time_taken if ex_temp else '' }}">
+    </div>
+
+    {# ── Discard toggle ───────────────────────────────────────────────── #}
+    <div class="discard-section" style="margin-bottom:14px">
+      <label style="font-weight:600;cursor:pointer">
+        <input type="checkbox" name="is_discarded" id="discardToggle"
+               {% if ex_temp and ex_temp.is_discarded %}checked{% endif %}>
+        ⚠️ Discard this reading
+      </label>
+      <div id="discardReason" style="margin-top:8px;{% if not (ex_temp and ex_temp.is_discarded) %}display:none{% endif %}">
+        <input type="text" name="discard_reason" placeholder="Reason (e.g. illness, late waking, alcohol)"
+               value="{{ ex_temp.discard_reason if ex_temp else '' }}">
+      </div>
+    </div>
+
+    {# ── Flow & Mucus ──────────────────────────────────────────────────── #}
+    <div class="section-title">🩸 Menstrual Flow</div>
+    <div class="checkbox-group" style="margin-bottom:14px">
+      {% for val, label in [('','Not logged'),('none','None'),('spotting','Spotting'),('light','Light'),('medium','Medium'),('heavy','Heavy')] %}
+        <label class="checkbox-item">
+          <input type="radio" name="menstrual_flow" value="{{ val }}"
+                 {% if (ex_signs and ex_signs.menstrual_flow == val) or (not ex_signs and val == '') %}checked{% endif %}>
+          {{ label }}
+        </label>
+      {% endfor %}
+    </div>
+
+    <div class="section-title">💧 Cervical Mucus</div>
+    <div class="checkbox-group" style="margin-bottom:14px">
+      {% for val, label in [('','Not logged'),('dry','Dry'),('sticky','Sticky'),('creamy','Creamy'),('watery','Watery'),('egg_white','Egg White')] %}
+        <label class="checkbox-item">
+          <input type="radio" name="cervical_mucus" value="{{ val }}"
+                 {% if (ex_signs and ex_signs.cervical_mucus == val) or (not ex_signs and val == '') %}checked{% endif %}>
+          {{ label }}
+        </label>
+      {% endfor %}
+    </div>
+
+    <div class="section-title">🔬 OPK (Ovulation Predictor Kit)</div>
+    <div class="checkbox-group" style="margin-bottom:14px">
+      {% for val, label in [('not_tested','Not Tested'),('negative','Negative'),('low','Low'),('high','High'),('peak','Peak / Positive')] %}
+        <label class="checkbox-item">
+          <input type="radio" name="opk_result" value="{{ val }}"
+                 {% if ex_signs and ex_signs.opk_result == val %}checked
+                 {% elif not ex_signs and val == 'not_tested' %}checked{% endif %}>
+          {{ label }}
+        </label>
+      {% endfor %}
+    </div>
+
+    {# ── Cervical position (collapsed) ─────────────────────────────────── #}
+    <details style="margin-bottom:14px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:500;color:var(--primary-dark)">
+        🔭 Cervical Position (optional)
+      </summary>
+      <div style="padding:10px 0 0 0">
+        <div class="form-group">
+          <label>Position</label>
+          <div class="checkbox-group">
+            {% for val, label in [('','Not checked'),('low','Low'),('mid','Mid'),('high','High')] %}
+              <label class="checkbox-item">
+                <input type="radio" name="cervical_position" value="{{ val }}"
+                       {% if ex_signs and ex_signs.cervical_position == val %}checked
+                       {% elif not ex_signs and val == '' %}checked{% endif %}>
+                {{ label }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Firmness</label>
+            <div class="checkbox-group">
+              {% for val, label in [('',''),('firm','Firm'),('medium','Medium'),('soft','Soft')] %}
+                <label class="checkbox-item">
+                  <input type="radio" name="cervical_firmness" value="{{ val }}"
+                         {% if ex_signs and ex_signs.cervical_firmness == val %}checked{% endif %}>
+                  {{ label or '—' }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Opening</label>
+            <div class="checkbox-group">
+              {% for val, label in [('',''),('closed','Closed'),('medium','Medium'),('open','Open')] %}
+                <label class="checkbox-item">
+                  <input type="radio" name="cervical_opening" value="{{ val }}"
+                         {% if ex_signs and ex_signs.cervical_opening == val %}checked{% endif %}>
+                  {{ label or '—' }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    {# ── Symptoms ─────────────────────────────────────────────────────── #}
+    <div class="section-title">🤒 Symptoms</div>
+    <div class="checkbox-group" style="margin-bottom:8px">
+      {% set sym_list = [
+        ('cramps','Cramps'),('bloating','Bloating'),
+        ('breast_tenderness','Breast Tenderness'),('ovulation_pain','Ovulation Pain'),
+        ('headache','Headache'),('spotting','Spotting'),
+        ('mood_changes','Mood Changes'),('fatigue','Fatigue'),('other','Other')
+      ] %}
+      {% for val, label in sym_list %}
+        <label class="checkbox-item">
+          <input type="checkbox" name="symptoms" value="{{ val }}"
+                 {% if val in ex_symptoms %}checked{% endif %}>
+          {{ label }}
+        </label>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      <label>Severity</label>
+      <div class="checkbox-group">
+        {% for n, label in [(1,'Mild'),(2,'Moderate'),(3,'Severe')] %}
+          <label class="checkbox-item">
+            <input type="radio" name="symptom_severity" value="{{ n }}"
+                   {% if ex_severity == n %}checked{% elif n == 1 and not ex_symptoms %}checked{% endif %}>
+            {{ label }}
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ── Notes ────────────────────────────────────────────────────────── #}
+    <div class="form-group">
+      <label for="temp_notes">Notes (temperature)</label>
+      <textarea id="temp_notes" name="temp_notes" rows="2"
+                placeholder="e.g. woke up late, feeling ill">{{ ex_temp.notes if ex_temp else '' }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="signs_notes">Notes (signs)</label>
+      <textarea id="signs_notes" name="signs_notes" rows="2"
+                placeholder="Any other observations">{{ ex_signs.notes if ex_signs else '' }}</textarea>
+    </div>
+
+    {# ── Period start ─────────────────────────────────────────────────── #}
+    <div class="period-section" style="margin-bottom:14px">
+      <label style="font-weight:600;cursor:pointer">
+        <input type="checkbox" name="is_period_start" id="periodToggle">
+        🩸 This is the first day of my period (starts a new cycle)
+      </label>
+      <p style="font-size:12px;color:#880e4f;margin-top:4px">
+        ⚠️ This will close the current cycle and start a new one from the selected date.
+      </p>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block">💾 Save Entry</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const toggle = document.getElementById('discardToggle');
+  const reason = document.getElementById('discardReason');
+  toggle.addEventListener('change', () => {
+    reason.style.display = toggle.checked ? 'block' : 'none';
+  });
+</script>
+{% endblock %}

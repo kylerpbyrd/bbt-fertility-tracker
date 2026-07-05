@@ -1,0 +1,30 @@
+name: "BBT Fertility Tracker"
+version: "1.0.0"
+slug: bbt_fertility_tracker
+description: >-
+  Track basal body temperature to monitor menstrual cycles, detect ovulation,
+  and identify fertile windows using the sympto-thermal method. Inspired by
+  Fertility Friend. Publishes insights as Home Assistant entities.
+url: "https://github.com/kylerpbyrd/bbt-fertility-tracker"
+arch:
+  - amd64
+  - aarch64
+  - armhf
+  - armv7
+startup: application
+boot: auto
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:thermometer-lines
+panel_title: "Fertility Tracker"
+homeassistant_api: true
+hassio_api: false
+options:
+  temp_unit: "F"
+  ha_sensor_entity: ""
+  poll_interval_minutes: 15
+schema:
+  temp_unit: "list(F|C)"
+  ha_sensor_entity: "str?"
+  poll_interval_minutes: "int(1,60)?"
+init: false

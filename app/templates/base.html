@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}BBT Fertility Tracker{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="app-header">
+    <nav class="navbar">
+      <div class="nav-brand">
+        <span>🌡️</span>
+        <span>BBT Tracker</span>
+        {% if profile %}
+          <span class="profile-badge">{{ profile.name }}</span>
+        {% endif %}
+      </div>
+      <ul class="nav-menu">
+        <li><a href="{{ url_for('dashboard') }}"
+               class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+          📊 Dashboard</a></li>
+        <li><a href="{{ url_for('entry') }}"
+               class="nav-link {% if request.endpoint == 'entry' %}active{% endif %}">
+          ➕ Log</a></li>
+        <li><a href="{{ url_for('history') }}"
+               class="nav-link {% if request.endpoint in ['history','cycle_detail'] %}active{% endif %}">
+          📅 History</a></li>
+        <li><a href="{{ url_for('profiles') }}"
+               class="nav-link {% if request.endpoint == 'profiles' %}active{% endif %}">
+          👤 Profiles</a></li>
+        <li><a href="{{ url_for('settings') }}"
+               class="nav-link {% if request.endpoint == 'settings' %}active{% endif %}">
+          ⚙️ Settings</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alerts">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,419 @@
+/* ────────────────────────────────────────────────────────────────────────────
+   BBT Fertility Tracker — App Styles
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Custom properties ────────────────────────────────────────────────────── */
+:root {
+  --primary: #9c27b0;
+  --primary-dark: #6a0080;
+  --primary-light: #ce93d8;
+  --accent: #e91e63;
+  --accent-light: #f48fb1;
+
+  /* Phase colours */
+  --phase-menstruation: #ef5350;
+  --phase-pre-ovulatory: #42a5f5;
+  --phase-fertile: #66bb6a;
+  --phase-ovulation: #ff9800;
+  --phase-luteal: #ab47bc;
+  --phase-unknown: #bdbdbd;
+
+  /* Chart annotation colours */
+  --coverline-color: #e53935;
+  --fertile-fill: rgba(102, 187, 106, 0.15);
+  --ov-line: #ff9800;
+
+  /* Neutrals */
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --border: #e0e0e0;
+  --text: #212121;
+  --text-secondary: #757575;
+
+  --radius: 10px;
+  --shadow: 0 2px 8px rgba(0,0,0,.08);
+  --font: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Reset ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Navbar ───────────────────────────────────────────────────────────────── */
+.app-header {
+  background: var(--primary);
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+  height: 54px;
+  gap: 16px;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+.profile-badge {
+  background: rgba(255,255,255,.2);
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 2px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+.nav-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: rgba(255,255,255,.85);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.nav-link:hover { background: rgba(255,255,255,.15); text-decoration: none; color: #fff; }
+.nav-link.active { background: rgba(255,255,255,.25); color: #fff; }
+
+/* ── Main content ─────────────────────────────────────────────────────────── */
+.main-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 16px 60px;
+}
+
+/* ── Alerts ───────────────────────────────────────────────────────────────── */
+.alerts { margin-bottom: 12px; }
+.alert {
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.alert-success { background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; }
+.alert-error   { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
+.alert-warning { background: #fff8e1; color: #e65100; border: 1px solid #ffe082; }
+.alert-info    { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+
+/* ── Cards ────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Grids ────────────────────────────────────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+@media (max-width: 640px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ── Stat tiles ───────────────────────────────────────────────────────────── */
+.stat-tile {
+  background: #f3e5f5;
+  border-radius: var(--radius);
+  padding: 12px;
+  text-align: center;
+}
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* ── Phase banner ─────────────────────────────────────────────────────────── */
+.phase-banner {
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  color: #fff;
+}
+.phase-name { font-size: 20px; font-weight: 700; }
+.phase-sub  { font-size: 13px; opacity: .85; margin-top: 2px; }
+
+.phase-banner.phase-menstruation { background: linear-gradient(135deg, #ef5350, #e53935); }
+.phase-banner.phase-pre_ovulatory { background: linear-gradient(135deg, #42a5f5, #1976d2); }
+.phase-banner.phase-fertile { background: linear-gradient(135deg, #66bb6a, #388e3c); }
+.phase-banner.phase-ovulation { background: linear-gradient(135deg, #ffa726, #e65100); }
+.phase-banner.phase-luteal { background: linear-gradient(135deg, #ab47bc, #6a0080); }
+.phase-banner.phase-unknown { background: linear-gradient(135deg, #bdbdbd, #757575); }
+
+/* ── Phase badges (inline) ────────────────────────────────────────────────── */
+.phase-badge {
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  display: inline-block;
+}
+.phase-badge.phase-menstruation { background: var(--phase-menstruation); }
+.phase-badge.phase-pre_ovulatory { background: var(--phase-pre-ovulatory); }
+.phase-badge.phase-fertile { background: var(--phase-fertile); }
+.phase-badge.phase-ovulation { background: var(--phase-ovulation); }
+.phase-badge.phase-luteal { background: var(--phase-luteal); }
+.phase-badge.phase-unknown { background: var(--phase-unknown); }
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-block;
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: filter .15s;
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn:hover { filter: brightness(1.08); text-decoration: none; }
+.btn-primary   { background: var(--primary); color: #fff; }
+.btn-accent    { background: var(--accent); color: #fff; }
+.btn-secondary { background: #f3e5f5; color: var(--primary-dark); border: 1px solid #ce93d8; }
+.btn-danger    { background: #ef5350; color: #fff; }
+.btn-sm        { padding: 5px 12px; font-size: 12px; }
+.btn-block     { display: block; width: 100%; }
+
+/* ── Form elements ────────────────────────────────────────────────────────── */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="email"],
+select,
+textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(156,39,176,.15);
+}
+textarea { resize: vertical; min-height: 60px; }
+
+/* Big temperature input */
+.temp-input-large {
+  font-size: 32px !important;
+  font-weight: 700 !important;
+  text-align: center;
+  padding: 12px !important;
+  color: var(--primary-dark) !important;
+}
+
+/* Section title */
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin: 14px 0 8px;
+}
+
+/* ── Checkbox / radio groups ──────────────────────────────────────────────── */
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f5f5f5;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background .15s, border-color .15s;
+}
+.checkbox-item:hover { background: #f3e5f5; border-color: var(--primary-light); }
+.checkbox-item input[type="checkbox"]:checked + *,
+.checkbox-item:has(input:checked) { color: var(--primary-dark); font-weight: 600; }
+.checkbox-item:has(input:checked) {
+  background: #f3e5f5;
+  border-color: var(--primary);
+}
+
+/* ── Charts ───────────────────────────────────────────────────────────────── */
+.chart-container { position: relative; height: 300px; width: 100%; }
+.mini-chart-container { position: relative; height: 140px; width: 100%; }
+
+/* ── Table ────────────────────────────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: #f3e5f5;
+  color: var(--primary-dark);
+  font-weight: 600;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--primary-light);
+}
+tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:hover td { background: #fafafa; }
+
+/* ── Chips ────────────────────────────────────────────────────────────────── */
+.ha-sensor-chip {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 12px;
+  color: #0d47a1;
+  display: inline-block;
+}
+.temp-chip {
+  background: #f3e5f5;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.sign-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 6px;
+}
+.signs-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ── Flow colours ─────────────────────────────────────────────────────────── */
+.flow-spotting { color: #ff8a65; }
+.flow-light    { color: #ef5350; }
+.flow-medium   { color: #e53935; }
+.flow-heavy    { color: #b71c1c; }
+
+/* ── Mucus colours ────────────────────────────────────────────────────────── */
+.mucus-dry       { color: #ff8a65; }
+.mucus-sticky    { color: #ffa726; }
+.mucus-creamy    { color: #ffee58; }
+.mucus-watery    { color: #42a5f5; }
+.mucus-egg_white { color: #26c6da; font-weight: 700; }
+
+/* ── OPK colours ──────────────────────────────────────────────────────────── */
+.opk-negative { color: var(--text-secondary); }
+.opk-low      { color: #ffa726; }
+.opk-high     { color: #ff7043; }
+.opk-peak     { color: #e53935; font-weight: 700; }
+
+/* ── Warning boxes ────────────────────────────────────────────────────────── */
+.warnings { margin-bottom: 12px; }
+.warning-box {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.warning-box.warning { background: #fff8e1; color: #e65100; border: 1px solid #ffe082; }
+.warning-box.info    { background: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+
+/* ── Profile rows ─────────────────────────────────────────────────────────── */
+.profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.profile-row:last-child { border-bottom: none; }
+.profile-row.profile-active { background: #f3e5f5; margin: -10px -16px; padding: 10px 16px; border-radius: 6px; }
+.profile-info { display: flex; flex-direction: column; gap: 2px; }
+.profile-name { font-weight: 600; font-size: 14px; }
+.profile-meta { font-size: 11px; color: var(--text-secondary); }
+.profile-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+}
+.empty-state .icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+/* ── Back link ────────────────────────────────────────────────────────────── */
+.back-link {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--primary);
+  margin-bottom: 12px;
+}

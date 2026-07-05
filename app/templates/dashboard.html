@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — BBT Fertility Tracker{% endblock %}
+
+{% block head %}
+{% if chart_js_local %}
+  <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chartjs-plugin-annotation.min.js') }}"></script>
+{% else %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/chart-init.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+{% if not profile %}
+  <div class="empty-state">
+    <span class="icon">🌡️</span>
+    <h2>Welcome to BBT Fertility Tracker</h2>
+    <p>No profile found. A default profile has been created for you.</p>
+    <a href="{{ url_for('entry') }}" class="btn btn-primary" style="margin-top:16px">Log your first temperature</a>
+  </div>
+{% else %}
+
+{# ── Phase banner ─────────────────────────────────────────────────────────── #}
+{% set phase_labels = {
+  'menstruation': 'Menstruation',
+  'pre_ovulatory': 'Pre-Ovulatory',
+  'fertile': 'Fertile Window',
+  'ovulation': 'Ovulation',
+  'luteal': 'Luteal Phase',
+  'unknown': 'Unknown'
+} %}
+<div class="phase-banner phase-{{ phase }}">
+  <div class="phase-info">
+    <div class="phase-name">{{ phase_labels.get(phase, phase.replace('_',' ').title()) }}</div>
+    <div class="phase-sub">
+      Cycle Day <strong>{{ cycle_day }}</strong>
+      {% if avg_cycle %} of ~{{ avg_cycle }} days{% endif %}
+    </div>
+  </div>
+  <div class="phase-cta">
+    {% if today_temp %}
+      <span class="temp-chip">
+        {{ today_temp.temp_value | round(2) }}°{{ profile.temp_unit }}
+        {% if today_temp.is_discarded %}<em>(discarded)</em>{% endif %}
+      </span>
+    {% else %}
+      <a href="{{ url_for('entry') }}" class="btn btn-accent">+ Log Today</a>
+    {% endif %}
+  </div>
+</div>
+
+{# ── Warnings ──────────────────────────────────────────────────────────────── #}
+{% if warnings %}
+  <div class="warnings">
+    {% for w in warnings %}
+      <div class="warning-box {{ w.type }}">⚠️ {{ w.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+{# ── HA sensor chip ──────────────────────────────────────────────────────── #}
+{% if ha_reading and not today_temp %}
+  <div style="margin-bottom:12px">
+    <span class="ha-sensor-chip">
+      🏠 HA Sensor: {{ ha_reading }}°{{ profile.temp_unit }} available —
+      <a href="{{ url_for('entry') }}" style="color:inherit">log entry</a>
+    </span>
+  </div>
+{% endif %}
+
+{# ── Stat tiles ───────────────────────────────────────────────────────────── #}
+<div class="grid-4" style="margin-bottom:16px">
+  <div class="stat-tile">
+    <div class="stat-value">{{ cycle_day }}</div>
+    <div class="stat-label">Cycle Day</div>
+  </div>
+  <div class="stat-tile">
+    {% if next_period %}
+      {% set days_until = ((next_period | string)[:10] | string) %}
+      <div class="stat-value" style="font-size:14px">{{ next_period[:10] }}</div>
+    {% else %}
+      <div class="stat-value" style="font-size:18px">—</div>
+    {% endif %}
+    <div class="stat-label">Next Period Est.</div>
+  </div>
+  <div class="stat-tile">
+    {% if insights.get('fertile_start_date') and insights.get('fertile_end_date') %}
+      {% set fs = insights.fertile_start_date %}
+      {% set fe = insights.fertile_end_date %}
+      <div class="stat-value" style="font-size:12px">{{ fs[5:] }} – {{ fe[5:] }}</div>
+    {% else %}
+      <div class="stat-value" style="font-size:18px">—</div>
+    {% endif %}
+    <div class="stat-label">Fertile Window</div>
+  </div>
+  <div class="stat-tile">
+    {% if insights.get('ovulation_date') %}
+      <div class="stat-value" style="font-size:14px">
+        {{ insights.ovulation_date[5:] }}
+        {% if insights.get('ovulation_confirmed') %}✓{% else %}?{% endif %}
+      </div>
+    {% else %}
+      <div class="stat-value" style="font-size:18px">—</div>
+    {% endif %}
+    <div class="stat-label">Ovulation</div>
+  </div>
+</div>
+
+{# ── Mini BBT chart ───────────────────────────────────────────────────────── #}
+{% if cycle %}
+  <div class="card">
+    <div class="card-title">📈 Current Cycle Chart
+      <a href="{{ url_for('cycle_detail', cycle_id=cycle.id) }}"
+         style="font-size:12px;font-weight:400;margin-left:auto;color:var(--primary)">
+        Full chart →
+      </a>
+    </div>
+    <div class="mini-chart-container">
+      <canvas id="miniChart"></canvas>
+    </div>
+  </div>
+{% endif %}
+
+{# ── Today's fertility signs summary ─────────────────────────────────────── #}
+{% if today_signs %}
+  <div class="card">
+    <div class="card-title">🔍 Today's Signs</div>
+    <div class="signs-row">
+      {% if today_signs.menstrual_flow and today_signs.menstrual_flow != 'none' %}
+        <span class="sign-chip flow-{{ today_signs.menstrual_flow }}">
+          🩸 {{ today_signs.menstrual_flow | title }}
+        </span>
+      {% endif %}
+      {% if today_signs.cervical_mucus and today_signs.cervical_mucus != 'none' %}
+        <span class="sign-chip mucus-{{ today_signs.cervical_mucus }}">
+          💧 {{ today_signs.cervical_mucus | replace('_',' ') | title }}
+        </span>
+      {% endif %}
+      {% if today_signs.opk_result and today_signs.opk_result not in ['', 'not_tested'] %}
+        <span class="sign-chip opk-{{ today_signs.opk_result }}">
+          🧪 OPK: {{ today_signs.opk_result | replace('_',' ') | title }}
+        </span>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+{# ── Quick actions ─────────────────────────────────────────────────────────── #}
+<div class="grid-2">
+  <a href="{{ url_for('entry') }}" class="btn btn-primary btn-block">
+    ➕ Log Today's Entry
+  </a>
+  <a href="{{ url_for('history') }}" class="btn btn-secondary btn-block">
+    📅 View Cycle History
+  </a>
+</div>
+
+{% endif %}{# end if profile #}
+{% endblock %}
+
+{% block scripts %}
+{% if cycle %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const r = await fetch('{{ url_for("api_chart_data", cycle_id=cycle.id) }}');
+    const data = await r.json();
+    initMiniChart('miniChart', data);
+  } catch(e) {
+    console.warn('Chart load failed:', e);
+  }
+});
+</script>
+{% endif %}
+{% endblock %}
