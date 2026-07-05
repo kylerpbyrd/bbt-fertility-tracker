@@ -16,7 +16,7 @@ from datetime import date, timedelta
 from typing import Optional
 
 from algorithms.ovulation import detect_ovulation, OvulationResult
-from algorithms.fertile_window import compute_fertile_window, get_cycle_phase
+from algorithms.fertile_window import compute_fertile_window
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def get_current_cycle_day(cycle_start_date: str) -> int:
 
 
 def _past_cycle_lengths(db, profile_id: int, exclude_cycle_id: int,
-                         limit: int = 12) -> list[int]:
+                        limit: int = 12) -> list[int]:
     rows = db.execute(
         """
         SELECT cycle_length FROM cycles
@@ -45,7 +45,7 @@ def _past_cycle_lengths(db, profile_id: int, exclude_cycle_id: int,
 
 
 def _count_consecutive_elevated(temps: list[dict], coverline: float,
-                                  after_date: str) -> int:
+                                after_date: str) -> int:
     """
     Count how many consecutive non-discarded temperatures above *coverline*
     exist starting from (and including) *after_date*.

@@ -13,11 +13,12 @@ from flask import (Flask, flash, g, jsonify, redirect, render_template,
                    request, session, url_for)
 
 from algorithms.cycle_analysis import (analyze_cycle, get_current_cycle_day,
-                                        predict_next_period)
+                                       predict_next_period)
 from algorithms.fertile_window import get_cycle_phase
 import ha_client
 from db import (get_db, get_active_profile, get_or_create_current_cycle,
                 init_db, slugify)
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,6 +29,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # HA Ingress path middleware
 # ---------------------------------------------------------------------------
+
 
 class _IngressMiddleware:
     """Strip the HA ingress path prefix so Flask sees a normal SCRIPT_NAME."""

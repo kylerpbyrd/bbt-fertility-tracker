@@ -14,13 +14,14 @@ import os
 import threading
 import urllib.error
 import urllib.request
-from datetime import date, datetime
+from datetime import date
 from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
 _HA_API_BASE = "http://supervisor/core/api"
 _SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
+
 
 # ---------------------------------------------------------------------------
 # Low-level HTTP helpers
@@ -74,7 +75,7 @@ def get_entity(entity_id: str) -> dict | None:
 
 
 def publish_profile_entities(profile: dict, insights: dict,
-                              next_period: str | None = None) -> None:
+                             next_period: str | None = None) -> None:
     """
     Publish all tracked BBT entities for one profile to Home Assistant.
 

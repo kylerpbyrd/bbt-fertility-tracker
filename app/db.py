@@ -163,7 +163,7 @@ def get_active_profile(db: sqlite3.Connection, session_profile_id=None) -> dict 
 # ---------------------------------------------------------------------------
 
 def get_or_create_current_cycle(db: sqlite3.Connection, profile_id: int,
-                                 start_date: str | None = None) -> dict:
+                                start_date: str | None = None) -> dict:
     """
     Return the most recent open cycle for a profile.
     Creates a new cycle starting today if none exists.

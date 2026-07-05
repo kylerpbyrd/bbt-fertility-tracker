@@ -23,11 +23,11 @@ A "possible" detection (confidence='possible') is returned when exactly 2
 consecutive elevated temperatures have been seen — indicating the shift is
 likely but not yet confirmed.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Optional
 
-from algorithms.coverline import compute_coverline, THRESHOLD_F, THRESHOLD_C
+from algorithms.coverline import compute_coverline
 
 # Ovulation cannot occur before this cycle day
 MIN_CYCLE_DAY: int = 6
