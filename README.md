@@ -2,7 +2,7 @@
 
 > Track basal body temperature (BBT) to monitor menstrual cycles, detect ovulation, and identify fertile windows — directly inside Home Assistant.
 
-![Version](https://img.shields.io/badge/version-1.0.0-purple)
+![Version](https://img.shields.io/badge/version-1.0.4-purple)
 ![HA Ingress](https://img.shields.io/badge/HA-Ingress-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -90,6 +90,20 @@ pip install -r app/requirements.txt
 # Run locally (without HA)
 DATA_PATH=./data BBT_TEMP_UNIT=F python3 app/app.py
 ```
+
+### Testing
+
+The supported development runtime is Python 3.11. Install development tools
+and run the checks from the repository root:
+
+```bash
+python3 -m pip install -r requirements-dev.txt
+pytest
+flake8 app/ --max-line-length=110 --exclude=app/static --extend-ignore=E501
+```
+
+See [the release checklist](docs/release-checklist.md) before publishing an
+add-on update.
 
 ---
 

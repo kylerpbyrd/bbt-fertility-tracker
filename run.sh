@@ -14,7 +14,7 @@ export BBT_TEMP_UNIT="${TEMP_UNIT}"
 export BBT_HA_SENSOR_ENTITY="${HA_SENSOR_ENTITY}"
 export BBT_POLL_INTERVAL="${POLL_INTERVAL}"
 
-bashio::log.info "Starting BBT Fertility Tracker v1.0.0"
+bashio::log.info "Starting BBT Fertility Tracker v1.0.4"
 bashio::log.info "  Temperature unit : ${TEMP_UNIT}"
 bashio::log.info "  Poll interval    : ${POLL_INTERVAL} min"
 if [ -n "${HA_SENSOR_ENTITY}" ]; then
